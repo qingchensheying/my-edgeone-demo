@@ -1,2 +1,2 @@
-# my-edgeone-demo
-EdgeOne Pages部署测试
+# EdgeOne Pages 测试项目
+本仓库用于腾讯云EdgeOne Pages的部署测试，包含基础静态HTML页面。
