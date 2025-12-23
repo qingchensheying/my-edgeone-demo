@@ -3,22 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EdgeOne Pages测试页面</title>
+    <title>我的 EdgeOne 测试页</title> <!-- 修改页面标题 -->
     <style>
         body {
             margin: 0;
-            padding: 50px;
+            padding: 50px 20px; /* 适配移动端的内边距 */
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
             text-align: center;
+            max-width: 800px; /* 限制最大宽度，提升阅读体验 */
+            margin: 0 auto; /* 居中显示 */
         }
         h1 {
-            color: #165DFF; /* 腾讯云主题色 */
+            color: #165DFF; /* 保留腾讯云主题色 */
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+        .content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* 增加阴影效果 */
+        }
+        p {
+            color: #333;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .example-img {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .link-btn {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #165DFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .link-btn:hover {
+            background-color: #0E42D2; /*  hover时加深颜色 */
+        }
+        #interactive-btn {
+            padding: 10px 20px;
+            margin-top: 15px;
+            background-color: #36D399;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        #interactive-btn:hover {
+            background-color: #2BB573;
+        }
+        #msg {
+            margin-top: 15px;
+            color: #E53E3E;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>恭喜！EdgeOne Pages部署成功11 🎉</h1>
-    <p>这是从GitHub仓库拉取的静态页面</p>
+    <div class="content"> <!-- 新增容器，优化布局 -->
+        <h1>欢迎来到我的 EdgeOne 测试页 🌟</h1> <!-- 修改主标题 -->
+        <p>这是基于 EdgeOne Pages 部署的静态页面，内容从 GitHub 仓库拉取。</p> <!-- 优化描述文字 -->
+        
+        <!-- 新增示例图片 -->
+        <img src="https://picsum.photos/600/300" alt="示例图片" class="example-img">
+        
+        <!-- 新增产品链接 -->
+        <a href="https://cloud.tencent.com/product/edgeone" target="_blank" class="link-btn">
+            了解更多 EdgeOne 产品信息
+        </a>
+        
+        <!-- 新增交互按钮 -->
+        <button id="interactive-btn">点击我试试</button>
+        <p id="msg"></p>
+    </div>
+
+    <script>
+        // 按钮点击交互逻辑
+        const btn = document.getElementById("interactive-btn");
+        const msgElement = document.getElementById("msg");
+        
+        btn.addEventListener("click", () => {
+            const time = new Date().toLocaleTimeString();
+            msgElement.textContent = `按钮在 ${time} 被点击啦！`;
+            
+            // 3秒后清空消息
+            setTimeout(() => {
+                msgElement.textContent = "";
+            }, 3000);
+        });
+    </script>
 </body>
 </html>
