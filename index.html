@@ -1,107 +1,936 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的 EdgeOne 测试页</title> <!-- 修改页面标题 -->
+    <title>青尘摄影工作室</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0066CC',
+                        secondary: '#1E293B',
+                        accent: '#FF6D00',
+                        dark: '#111111',
+                        light: '#F5F5F5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- In-page error overlay: 捕获并显示 JS 错误，方便在不打开 DevTools 时查看 -->
     <style>
-        body {
-            margin: 0;
-            padding: 50px 20px; /* 适配移动端的内边距 */
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            text-align: center;
-            max-width: 800px; /* 限制最大宽度，提升阅读体验 */
-            margin: 0 auto; /* 居中显示 */
-        }
-        h1 {
-            color: #165DFF; /* 保留腾讯云主题色 */
-            margin-bottom: 30px;
-            font-size: 2.2rem;
-        }
-        .content {
-            background-color: white;
-            padding: 30px;
+        #errorOverlay {
+            display: none;
+            position: fixed;
+            bottom: 50px;
+            right: 20px;
+            width: 400px;
+            max-height: 400px;
+            background-color: rgba(20, 20, 30, 0.9);
+            color: #e0e0e0;
+            font-size: 12px;
+            padding: 12px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* 增加阴影效果 */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            z-index: 99999;
+            border: 1px solid rgba(150, 150, 170, 0.3);
+            overflow: hidden;
         }
-        p {
-            color: #333;
-            font-size: 1.1rem;
-            line-height: 1.6;
+
+        #errorList {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 0 10px 10px 10px;
         }
-        .example-img {
-            max-width: 100%;
-            height: auto;
-            margin: 20px 0;
+
+        #errorOverlay h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: #9e9eff;
+        }
+
+        #errorOverlay .icon-legend {
+            margin: 0 0 10px 0;
+            padding: 6px 8px;
+            background: rgba(255, 255, 255, 0.02);
             border-radius: 4px;
+            font-size: 10px;
+            color: #888;
         }
-        .link-btn {
+
+        #errorOverlay .icon-legend span {
             display: inline-block;
-            margin: 20px 0;
-            padding: 10px 20px;
-            background-color: #165DFF;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background-color 0.3s;
+            margin-right: 12px;
         }
-        .link-btn:hover {
-            background-color: #0E42D2; /*  hover时加深颜色 */
+
+        #errorOverlay .err {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            word-break: break-word;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        #interactive-btn {
-            padding: 10px 20px;
-            margin-top: 15px;
-            background-color: #36D399;
+
+        #errorOverlay .err:last-child {
+            margin-bottom: 0;
+        }
+
+        #errorOverlay pre {
+            white-space: pre-wrap;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            font-size: 11px;
+            color: #b0b0b0;
+            margin: 6px 0 0 0;
+            line-height: 1.4;
+        }
+
+        #errorOverlay .error-type {
+            font-weight: bold;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            color: #ff6666;
+        }
+
+        #errorOverlay .error-type::before {
+            content: '•';
+            margin-right: 6px;
+            font-size: 16px;
+        }
+
+        #errorOverlay .error-type.console-error::before {
+            content: '❌';
+            color: #ff7875;
+        }
+
+        #errorOverlay .error-type.console-warning::before {
+            content: '⚠️';
+            color: #ffd43b;
+        }
+
+        #errorOverlay .error-type.javascript-error::before {
+            content: '🐛';
+            color: #51cf66;
+        }
+
+        #errorOverlay .error-type.promise-rejection::before {
+            content: '🔄';
+            color: #868e96;
+        }
+
+        #errorOverlay .error-message {
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        #errorOverlay .error-stack {
+            color: #aaaaaa;
+            font-size: 10px;
+        }
+
+        #errorToggle {
+            position: fixed;
+            right: 12px;
+            bottom: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(75, 75, 150, 0.8);
             color: white;
             border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99998;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(75, 75, 150, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        #errorControls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        #errorClear {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 2px 6px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s;
+            font-size: 10px;
         }
-        #interactive-btn:hover {
-            background-color: #2BB573;
+
+        #errorClear:hover {
+            background: rgba(255, 255, 255, 0.08);
         }
-        #msg {
-            margin-top: 15px;
-            color: #E53E3E;
-            font-weight: bold;
+
+        #errorToggle {
+            position: fixed;
+            right: 12px;
+            bottom: 12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(75, 75, 150, 0.8);
+            color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+z-index: 99998;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(75, 75, 150, 0.3);
+transition: all 0.2s ease;
+        }
+#errorToggle:hover {
+            background: rgba(95, 95, 170, 0.9);
+            transform: scale(1.1);
+        }
+
+        #errorToggle.hide {
+            display: none;
+        }
+
+        /* 淡入动画 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
     </style>
-</head>
-<body>
-    <div class="content"> <!-- 新增容器，优化布局 -->
-        <h1>欢迎来到我的 EdgeOne 测试页 🌟</h1> <!-- 修改主标题 -->
-        <p>这是基于 EdgeOne Pages 部署的静态页面，内容从 GitHub 仓库拉取。</p> <!-- 优化描述文字 -->
-        
-        <!-- 新增示例图片 -->
-        <img src="https://picsum.photos/600/300" alt="示例图片" class="example-img">
-        
-        <!-- 新增产品链接 -->
-        <a href="https://cloud.tencent.com/product/edgeone" target="_blank" class="link-btn">
-            了解更多 EdgeOne 产品信息
-        </a>
-        
-        <!-- 新增交互按钮 -->
-        <button id="interactive-btn">点击我试试</button>
-        <p id="msg"></p>
-    </div>
-
     <script>
-        // 按钮点击交互逻辑
-        const btn = document.getElementById("interactive-btn");
-        const msgElement = document.getElementById("msg");
-        
-        btn.addEventListener("click", () => {
-            const time = new Date().toLocaleTimeString();
-            msgElement.textContent = `按钮在 ${time} 被点击啦！`;
-            
-            // 3秒后清空消息
-            setTimeout(() => {
-                msgElement.textContent = "";
-            }, 3000);
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?cf3a5f4a8a435f0a6a15ed90ddc7a1de";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</head>
+<!-- 修改body标签，添加flex布局类 -->
+
+<body class="bg-white text-secondary antialiased flex flex-col min-h-screen">
+
+    <!-- 修改main标签，添加flex-1使其自动扩展填充空间 -->
+    <main class="flex-1 pt-16 md:pt-20">
+        <!-- 错误捕获和显示组件 -->
+        <div id="errorOverlay" aria-live="polite">
+            <h4>
+                <span>页面错误（Console）</span>
+                <div id="errorControls">
+                    <button id="errorClear" title="清除错误">清除</button>
+                </div>
+            </h4>
+            <div id="errorList"></div>
+        </div>
+        <button id="errorToggle" title="显示/隐藏错误">!</button>
+        <script>
+            (function () {
+const overlay = document.getElementById('errorOverlay');
+                const list = document.getElementById('errorList');
+                const toggle = document.getElementById('errorToggle');
+                const clearBtn = document.getElementById('errorClear');
+                const MAX_ENTRIES = 40;
+
+                function serializeArg(arg) {
+                    try {
+                        if (typeof arg === 'string') return arg;
+                        if (arg instanceof Error) return arg.message + (arg.stack ? '\n' + arg.stack : '');
+                        if (typeof arg === 'object') return JSON.stringify(arg, getCircularReplacer(), 2);
+                        return String(arg);
+                    } catch (e) {
+                        try { return String(arg); } catch (_) { return '[无法序列化]'; }
+                    }
+                }
+
+                function getCircularReplacer() {
+                    const seen = new WeakSet();
+                    return (key, value) => {
+                        if (typeof value === 'object' && value !== null) {
+                            if (seen.has(value)) return '[Circular]';
+                            seen.add(value);
+                        }
+                        return value;
+                    };
+                }
+
+                function showEntry(title, body, errorClass = '') {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'err';
+
+                    // 创建标题行
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = `error-type ${errorClass}`;
+                    titleDiv.textContent = title;
+                    wrapper.appendChild(titleDiv);
+
+                    // 创建内容行
+                    if (body) {
+                        const pre = document.createElement('pre');
+                        pre.className = 'error-content';
+                        pre.textContent = body;
+                        wrapper.appendChild(pre);
+                    }
+
+                    // 添加到错误列表
+                    list.insertBefore(wrapper, list.firstChild);
+
+                    // 限制错误条目数量
+                    while (list.childElementCount > MAX_ENTRIES) {
+                        list.removeChild(list.lastChild);
+                    }
+
+                    // 只显示切换按钮，不自动弹出错误面板
+                    toggle.style.display = 'flex';
+
+                    // 滚动到最新错误
+                    list.scrollTop = 0;
+                }
+
+                // 捕获同步错误
+                window.addEventListener('error', function (e) {
+                    try {
+                        const errorType = 'JavaScript Error';
+                        const src = e.filename ? ` (${e.filename}:${e.lineno}:${e.colno})` : '';
+                        const message = `${e.message}${src}`;
+                        const stack = e.error && e.error.stack ? e.error.stack : (e.message || '');
+                        const timestamp = new Date().toLocaleString();
+                        showEntry(`${errorType} [${timestamp}]`, `${message}\n\nStack Trace:\n${stack}`, 'javascript-error');
+                    } catch (err) { /* ignore */ }
+                });
+
+                // 捕获未处理的 Promise 拒绝
+                window.addEventListener('unhandledrejection', function (e) {
+                    try {
+                        const errorType = 'Unhandled Promise Rejection';
+                        const reason = e.reason;
+                        const message = reason instanceof Error ? reason.message : serializeArg(reason);
+                        const stack = reason && reason.stack ? reason.stack : '';
+                        const timestamp = new Date().toLocaleString();
+                        showEntry(`${errorType} [${timestamp}]`, `${message}\n\nStack Trace:\n${stack}`, 'promise-rejection');
+                    } catch (err) { /* ignore */ }
+                });
+                // 捕获 console.error
+                const origConsoleError = console.error.bind(console.error);
+                console.error = function () {
+                    try {
+                        const errorType = 'Console Error';
+                        const parts = Array.from(arguments).map(arg => {
+                            if (arg instanceof Error) {
+                                return `${arg.message}\n\nStack Trace:\n${arg.stack}`;
+                            }
+                            return serializeArg(arg);
+                        }).join(' ');
+                        const timestamp = new Date().toLocaleString();
+                        showEntry(`${errorType} [${timestamp}]`, parts, 'console-error');
+                    } catch (e) { }
+                    origConsoleError.apply(null, arguments);
+                };
+
+                // 捕获 console.warn
+                const origConsoleWarn = console.warn.bind(console.warn);
+                console.warn = function () {
+                    try {
+                        const errorType = 'Console Warning';
+                        const parts = Array.from(arguments).map(serializeArg).join(' ');
+                        const timestamp = new Date().toLocaleString();
+                        showEntry(`${errorType} [${timestamp}]`, parts, 'console-warning');
+                    } catch (e) { }
+                    origConsoleWarn.apply(null, arguments);
+                };
+
+                // 添加图标说明
+                const legendDiv = document.createElement('div');
+                legendDiv.className = 'icon-legend';
+                legendDiv.innerHTML =
+'<span><strong>❌</strong> 控制台错误</span>' +
+                    '<span><strong>⚠️</strong> 控制台警告</span>' +
+                    '<span><strong>🐛</strong> 脚本错误</span>' +
+                    '<span><strong>🔄</strong> Promise拒绝</span>';
+                overlay.insertBefore(legendDiv, overlay.firstChild.nextSibling);
+
+                // 切换显示
+                toggle.addEventListener('click', function () {
+                    const isVisible = window.getComputedStyle(overlay).display !== 'none';
+                    if (isVisible) {
+                        overlay.style.display = 'none';
+                        toggle.textContent = '!';
+                    } else {
+                        overlay.style.display = 'block';
+                        toggle.textContent = '×';
+}
+                });
+
+                // 清除按钮
+                clearBtn.addEventListener('click', function () {
+                    list.innerHTML = '';
+                    overlay.style.display = 'none';
+                    toggle.style.display = 'none';
+                    toggle.textContent = '!';
+                });
+
+                // 初始状态：隐藏错误面板和切换按钮
+                overlay.style.display = 'none';
+                toggle.style.display = 'none';
+            })();
+        </script>
+        <!-- Tailwind CSS 自定义工具类 -->
+        <style type="text/tailwindcss">
+            @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+            .hover-scale {
+transition: transform 0.3s ease;
+            }
+            .hover-scale:hover {
+transform: scale(1.02);
+            }
+            .nav-active {
+                border-bottom: 2px solid #0066CC;
+            }
+        }
+    </style>
+        <!-- 基础动画和滚动样式 -->
+        <style>
+            /* 基础动画 */
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .fade-in {
+                animation: fadeIn 0.6s ease forwards;
+            }
+
+            .delay-100 {
+                animation-delay: 0.1s;
+            }
+
+            .delay-200 {
+                animation-delay: 0.2s;
+            }
+
+            .delay-300 {
+                animation-delay: 0.3s;
+            }
+
+            /* 滚动条样式 */
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 3px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: #f5f5f5;
+            }
+
+            /* 平滑滚动 */
+            html {
+                scroll-behavior: smooth;
+            }
+
+            /* 加载进度条 */
+            .progress-bar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 3px;
+                background: #0066CC;
+                z-index: 9999;
+                transition: width 0.2s ease;
+            }
+        </style>
+        <!-- 进度条 -->
+        <div class="progress-bar" id="progressBar"></div>
+
+        <!-- 导航栏 -->
+        <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm z-50 border-b border-gray-200">
+            <div class="container mx-auto px-4 md:px-6 lg:px-8">
+                <nav class="flex items-center justify-between h-16 md:h-20">
+
+                    <!-- Logo -->
+                    <a href="#" class="flex items-center space-x-2">
+                        <span class="text-xl font-bold text-dark">青尘摄影工作室</span>
+                    </a>
+
+                    <!-- 导航菜单 -->
+                    <div class="flex items-center space-x-6">
+                        <a href="alltuu.html" id="photoLiveLink" class="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/70 text-white rounded-md text-sm font-medium shadow-[0_4px_12px_rgba(0,102,204,0.3)] hover:bg-gradient-to-r from-primary/90 to-primary/50 hover:shadow-[0_6px_20px_rgba(0,102,204,0.4)] transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                            <i class="fa fa-camera"></i>
+                            <span>照片直播</span>
+                        </a>
+                    </div>
+
+                </nav>
+            </div>
+
+        </header>
+        <section id="home"
+            class="relative bg-gradient-to-br from-gray-50 to-gray-100 pt-0 md:pt-10 lg:pt-10 pb-8 md:pb-10 lg:pb-10">
+            <div class="container mx-auto px-4 md:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row gap-8 items-center max-w-4xl mx-auto">
+                    <!-- 工作照 - 保持中屏幕大小 -->
+                    <div class="w-full md:w-auto max-w-xs">
+                        <div class="aspect-[2/3] overflow-hidden rounded-lg shadow-md w-full">
+                            <img src="image/青尘摄影工作照.jpg" alt="工作照" class="w-full h-full object-cover" />
+                        </div>
+                    </div>
+
+                    <!-- 联系和更多信息区域 -->
+                    <div class="flex-1 space-y-8 flex flex-col items-start justify-center">
+
+                        <!-- 摄影师 -->
+                        <div>
+                            <h3 class="text-lg font-bold mb-4">摄影师：青尘</h3>
+                        </div>
+                        <!-- 联系我们 -->
+                        <div class="flex flex-row flex-wrap items-start gap-4">
+                            <div class="min-w-[150px]">
+                                <h3 class="text-lg font-bold mb-4">联系我们</h3>
+                                <ul class="space-y-2 text-sm text-gray-400">
+                                    <li class="flex items-center">
+                                        <i class="fa fa-wechat fa-fw mr-2"></i>
+                                        <span>微信：qingchen-sheying</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fa fa-phone fa-fw mr-2"></i>
+                                        <span>电话：13927778216</span>
+                                    </li>
+                                    <li class="flex items-center">
+                                        <i class="fa fa-map-marker fa-fw mr-2"></i>
+                                        <span>地址：佛山南海桂城</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- 微信二维码 - 与微信行上沿精确对齐 -->
+                            <div class="min-w-[100px] mt-[2.5rem]">
+                                <img src="image/青尘摄影二维码.png" alt="微信二维码"
+                                    class="w-24 h-24 bg-white p-1 rounded-md shadow-md border border-gray-200">
+                                <!-- 提示文字 -->
+                                <div class="text-xs text-center text-gray-500 mt-1 whitespace-normal">微信二维码</div>
+                            </div>
+                        </div>
+
+                        <!-- 更多内容 -->
+                        <div>
+                            <h3 class="text-lg font-bold mb-4">更多内容</h3>
+                            <ul class="space-y-2 text-sm text-gray-400">
+                                <li class="flex items-center">
+                                    <i class="fa fa-book fa-fw mr-2"></i>
+                                    <a href="https://xhslink.com/m/v0QEHdiJts" target="_blank" rel="noopener noreferrer"
+                                        class="text-primary hover:text-blue-400 transition-colors underline">小红书：青尘摄影工作室（小红书号：4946319780）</a>
+                                </li>
+                                <li class="hidden flex items-center">
+                                    <i class="fa fa-video-camera fa-fw mr-2"></i>
+                                    <a href="https://v.douyin.com/8ESnE340cFs" target="_blank" rel="noopener noreferrer"
+                                        class="text-gray-400 hover:text-gray-600 transition-colors">抖音：青尘摄影工作室（抖音号：31881264292）</a>
+                                </li>
+                                <li class="hidden flex items-center">
+                                    <i class="fa fa-play-circle fa-fw mr-2"></i>
+                                    <a href="https://v.kuaishou.com/KyJ1PhwJ" target="_blank" rel="noopener noreferrer"
+                                        class="text-gray-400 hover:text-gray-600 transition-colors">快手：青尘摄影工作室（快手号：2401556123）</a>
+                                </li>
+                                <li class="hidden flex items-center">
+                                    <i class="fa fa-file-text-o fa-fw mr-2"></i>
+                                    <span>公众号：青尘摄影（公众号ID：gh_4ee41fbd2b47）</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 装饰图形 -->
+                <div class="absolute top-1/2 left-10 transform -translate-y-1/2 hidden lg:block">
+                    <div class="w-20 h-20 bg-accent/10 rounded-full"></div>
+                </div>
+                <div class="absolute bottom-10 right-10 hidden lg:block">
+                    <div class="w-32 h-32 bg-primary/10 rounded-full"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 作品展示 -->
+        <section id="works" class="hidden py-16 md:py-24">
+            <div class="container mx-auto px-4 md:px-6 lg:px-8">
+                <div class="text-center mb-16 fade-in">
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-4">AI智能修图</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">不懂参数也没关系，轻松做出专业级效果。</p>
+                </div>
+
+                <!-- 作品网格 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                    <!-- 作品项1 -->
+                    <div
+                        class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow hover-scale fade-in delay-100">
+                        <div class="h-48 overflow-hidden bg-gray-200">
+                            <img src="https://picsum.photos/300/225?random=1" srcset="https://picsum.photos/300/225?random=1 300w, 
+                                        https://picsum.photos/600/450?random=1 600w, 
+                                        https://picsum.photos/800/600?random=1 800w" sizes="(max-width: 640px) 300px, 
+                                       (max-width: 1024px) 600px, 
+                                       800px" alt="游戏设计作品"
+                                class="w-full h-full object-cover transition-opacity duration-500" loading="lazy"
+                                width="800" height="600">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2 text-dark">手游UI设计</h3>
+                            <p class="text-gray-600 mb-4">为热门手游打造的全新用户界面，提升玩家体验与操作效率。</p>
+                            <a href="#" class="text-primary font-medium flex items-center">
+                                查看详情 <i class="fa fa-arrow-right ml-2 text-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 作品项2 -->
+                    <div
+                        class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow hover-scale fade-in delay-200">
+                        <div class="h-48 overflow-hidden bg-gray-200">
+                            <img src="https://picsum.photos/300/225?random=2" srcset="https://picsum.photos/300/225?random=2 300w, 
+                                        https://picsum.photos/600/450?random=2 600w, 
+                                        https://picsum.photos/800/600?random=2 800w" sizes="(max-width: 640px) 300px, 
+                                       (max-width: 1024px) 600px, 
+                                       800px" alt="游戏设计作品"
+                                class="w-full h-full object-cover transition-opacity duration-500" loading="lazy"
+                                width="800" height="600">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2 text-dark">游戏视觉设计</h3>
+                            <p class="text-gray-600 mb-4">构建统一的游戏视觉语言，打造沉浸式的游戏视觉体验。</p>
+                            <a href="#" class="text-primary font-medium flex items-center">
+                                查看详情 <i class="fa fa-arrow-right ml-2 text-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 作品项3 -->
+                    <div
+                        class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow hover-scale fade-in delay-300">
+                        <div class="h-48 overflow-hidden bg-gray-200">
+                            <img src="https://picsum.photos/300/225?random=3" srcset="https://picsum.photos/300/225?random=3 300w, 
+                                        https://picsum.photos/600/450?random=3 600w, 
+                                        https://picsum.photos/800/600?random=3 800w" sizes="(max-width: 640px) 300px, 
+                                       (max-width: 1024px) 600px, 
+                                       800px" alt="游戏设计作品"
+                                class="w-full h-full object-cover transition-opacity duration-500" loading="lazy"
+                                width="800" height="600">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2 text-dark">交互体验设计</h3>
+                            <p class="text-gray-600 mb-4">优化游戏交互流程，降低玩家学习成本，提升游戏乐趣。</p>
+                            <a href="#" class="text-primary font-medium flex items-center">
+                                查看详情 <i class="fa fa-arrow-right ml-2 text-sm"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 查看更多按钮 -->
+                <div class="text-center mt-12">
+                    <a href="#"
+                        class="inline-flex items-center px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                        查看更多作品 <i class="fa fa-chevron-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white h-16 md:h-20 flex items-center">
+        <div class="container mx-auto px-4 md:px-6 lg:px-8 w-full">
+            <!-- 版权信息 -->
+            <div class="text-center text-gray-500 text-sm">
+                <p class="max-w-full break-normal">
+                    <span class="block sm:inline">© 2025-2026 青尘摄影工作室 版权所有</span>
+                    <span class="hidden sm:inline"> | </span>
+                    <span class="block sm:inline">
+                        <a href="privacy.html" class="text-primary hover:text-blue-400 transition-colors underline">隐私策略</a>
+                    </span>
+                    <span class="hidden sm:inline"> | </span>
+                    <span class="block sm:inline">
+                        <a href="http://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"
+                            class="text-primary hover:text-blue-400 transition-colors underline">
+                            粤ICP备2025515306号-1
+                        </a>
+                    </span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 移动端菜单切换（加防空判断，避免找不到元素时抛错）
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const menuBtn = document.getElementById('menuBtn');
+                const mobileMenu = document.getElementById('mobileMenu');
+
+                if (menuBtn) {
+                    menuBtn.addEventListener('click', () => {
+                        if (mobileMenu) mobileMenu.classList.toggle('hidden');
+                        // 切换图标（存在时）
+                        const icon = menuBtn.querySelector('i');
+                        if (icon) {
+                            if (icon.classList.contains('fa-bars')) {
+                                icon.classList.replace('fa-bars', 'fa-times');
+                            } else {
+                                icon.classList.replace('fa-times', 'fa-bars');
+                            }
+                        }
+                    });
+
+                    // 点击菜单链接后关闭菜单
+                    if (mobileMenu) {
+                        const mobileLinks = mobileMenu.querySelectorAll('a');
+                        mobileLinks.forEach(link => {
+                            link.addEventListener('click', () => {
+                                mobileMenu.classList.add('hidden');
+                                // 切换图标回bars
+                                const icon = menuBtn.querySelector('i');
+                                if (icon) {
+                                    icon.classList.replace('fa-times', 'fa-bars');
+                                }
+                            });
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('移动端菜单切换出错:', error);
+            }
         });
+
+        // 滚动进度条和导航栏样式变化
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                let progressBar = null;
+
+                // 尝试获取进度条元素
+                progressBar = document.getElementById('progressBar');
+
+                // 如果没有找到进度条元素，记录警告但不中断执行
+                if (!progressBar) {
+                    console.warn('未找到滚动进度条元素 (#progressBar)');
+                }
+
+                window.addEventListener('scroll', () => {
+                    try {
+                        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                        const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                        const scrollPercentage = (scrollHeight > 0) ? (scrollTop / scrollHeight) * 100 : 0;
+
+                        if (progressBar) progressBar.style.width = scrollPercentage + '%';
+
+                        // 导航栏样式变化
+                        const header = document.querySelector('header');
+                        if (header) {
+                            if (scrollTop > 50) {
+                                header.classList.add('shadow-sm');
+                            } else {
+                                header.classList.remove('shadow-sm');
+                            }
+                        }
+                    } catch (scrollError) {
+                        console.error('滚动事件处理出错:', scrollError);
+                    }
+                });
+            } catch (error) {
+                console.error('滚动进度条初始化出错:', error);
+            }
+        });
+
+        // 导航链接激活状态
+        window.addEventListener('scroll', () => {
+            try {
+                const sections = document.querySelectorAll('section[id]');
+                const navLinks = document.querySelectorAll('nav a[href^="#"]');
+
+                let current = '';
+                // 使用window.scrollY确保正确引用窗口滚动位置
+                const scrollY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
+
+                if (sections.length > 0) {
+                    sections.forEach(section => {
+                        const sectionTop = section.offsetTop;
+                        const sectionHeight = section.clientHeight;
+                        if (scrollY >= sectionTop - 100) {
+                            current = section.getAttribute('id');
+                        }
+                    });
+                }
+
+                // 确保 navLinks 存在且不为空
+                if (navLinks && navLinks.length > 0) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('nav-active', 'text-primary');
+                        link.classList.add('text-gray-700');
+
+                        if (link.getAttribute('href') === `#${current}`) {
+                            link.classList.add('nav-active', 'text-primary');
+                            link.classList.remove('text-gray-700');
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('导航链接激活状态出错:', error);
+            }
+        });
+
+        // 图片懒加载 - 简化版
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // 测试错误报告功能（可以删除）
+                /* console.error('测试错误：这是一个演示错误', new Error('测试错误堆栈信息'));
+                console.warn('测试警告：这是一个演示警告');
+                setTimeout(() => {
+                    throw new Error('测试未捕获错误');
+                }, 1000);
+                setTimeout(() => {
+                    Promise.reject('测试未处理的Promise拒绝');
+                }, 2000); */
+                // 只对带有loading="lazy"属性的图片应用懒加载
+                const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+
+                // 检查IntersectionObserver是否可用
+                if ('IntersectionObserver' in window && lazyImages.length > 0) {
+                    // 提前200px开始加载图片
+                    const options = {
+                        rootMargin: '200px 0px',
+                        threshold: 0.1
+                    };
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const img = entry.target;
+                                // 添加淡入效果
+                                img.style.transition = 'opacity 0.5s ease-in';
+                                img.style.opacity = '1';
+                                observer.unobserve(img);
+                            }
+                        });
+                    }, options);
+
+                    // 为所有懒加载图片添加初始状态
+                    lazyImages.forEach(img => {
+                        img.style.opacity = '0';
+                        observer.observe(img);
+                    });
+                } else {
+                    // 降级方案：立即显示所有懒加载图片
+                    lazyImages.forEach(img => {
+                        img.style.opacity = '1';
+                    });
+                }
+            } catch (error) {
+                console.error('图片懒加载出错:', error);
+            }
+        });
+// 更新照片直播链接，添加URL参数（如果有）
+function updatePhotoLiveLink() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const albumId = urlParams.get('id');
+    const photoLiveLink = document.getElementById('photoLiveLink');
+    
+    if (albumId) {
+        photoLiveLink.href = `alltuu.html?id=${albumId}`;
+    } else {
+        photoLiveLink.href = 'alltuu.html';
+    }
+}
+
+// 页面加载完成后执行
+window.addEventListener('DOMContentLoaded', function() {
+    // 保持原有的图片懒加载代码
+    try {
+        const lazyImages = document.querySelectorAll('img.lazy');
+        if ('IntersectionObserver' in window) {
+            const options = {
+                rootMargin: '200px 0px',
+                threshold: 0.1
+            };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        // 添加淡入效果
+                        img.style.transition = 'opacity 0.5s ease-in';
+                        img.style.opacity = '1';
+                        observer.unobserve(img);
+                    }
+                });
+            }, options);
+
+            // 为所有懒加载图片添加初始状态
+            lazyImages.forEach(img => {
+                img.style.opacity = '0';
+                observer.observe(img);
+            });
+        } else {
+            // 降级方案：立即显示所有懒加载图片
+            lazyImages.forEach(img => {
+                img.style.opacity = '1';
+            });
+        }
+    } catch (error) {
+        console.error('图片懒加载出错:', error);
+    }
+    
+    // 添加我们的新功能
+    updatePhotoLiveLink();
+});
     </script>
 </body>
+
 </html>
