@@ -5,6 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>青尘摄影工作室</title>
+    <!-- 核心Open Graph标签（微信完全遵守此标准） -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.qingchensheying.com/index.html">
+    <meta property="og:title" content="青尘摄影工作室官网">
+    <meta property="og:description" content="www.qingchensheying.com 广东 佛山">
+    <meta property="og:image" content="https://www.qingchensheying.com/image/青尘摄影工作照方.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:site_name" content="青尘摄影工作室">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -30,6 +40,20 @@
     </script>
     <!-- In-page error overlay: 捕获并显示 JS 错误，方便在不打开 DevTools 时查看 -->
     <style>
+        /* 页脚智能分隔线 */
+        .footer-item:not(:first-child) {
+            position: relative;
+            margin-left: 0.25rem;
+            padding-left: 0.5rem;
+        }
+        
+        .footer-item:not(:first-child)::before {
+            content: '|';
+            position: absolute;
+            left: 0;
+            color: #4B5563;
+        }
+
         #errorOverlay {
             display: none;
             position: fixed;
@@ -202,13 +226,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-z-index: 99998;
+            z-index: 99998;
             border: none;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(75, 75, 150, 0.3);
-transition: all 0.2s ease;
+            transition: all 0.2s ease;
         }
-#errorToggle:hover {
+
+        #errorToggle:hover {
             background: rgba(95, 95, 170, 0.9);
             transform: scale(1.1);
         }
@@ -261,7 +286,7 @@ transition: all 0.2s ease;
         <button id="errorToggle" title="显示/隐藏错误">!</button>
         <script>
             (function () {
-const overlay = document.getElementById('errorOverlay');
+                const overlay = document.getElementById('errorOverlay');
                 const list = document.getElementById('errorList');
                 const toggle = document.getElementById('errorToggle');
                 const clearBtn = document.getElementById('errorClear');
@@ -378,7 +403,7 @@ const overlay = document.getElementById('errorOverlay');
                 const legendDiv = document.createElement('div');
                 legendDiv.className = 'icon-legend';
                 legendDiv.innerHTML =
-'<span><strong>❌</strong> 控制台错误</span>' +
+                    '<span><strong>❌</strong> 控制台错误</span>' +
                     '<span><strong>⚠️</strong> 控制台警告</span>' +
                     '<span><strong>🐛</strong> 脚本错误</span>' +
                     '<span><strong>🔄</strong> Promise拒绝</span>';
@@ -389,11 +414,11 @@ const overlay = document.getElementById('errorOverlay');
                     const isVisible = window.getComputedStyle(overlay).display !== 'none';
                     if (isVisible) {
                         overlay.style.display = 'none';
-                        toggle.textContent = '!';
+toggle.textContent = '!';
                     } else {
                         overlay.style.display = 'block';
                         toggle.textContent = '×';
-}
+                    }
                 });
 
                 // 清除按钮
@@ -401,7 +426,7 @@ const overlay = document.getElementById('errorOverlay');
                     list.innerHTML = '';
                     overlay.style.display = 'none';
                     toggle.style.display = 'none';
-                    toggle.textContent = '!';
+toggle.textContent = '!';
                 });
 
                 // 初始状态：隐藏错误面板和切换按钮
@@ -505,8 +530,9 @@ transform: scale(1.02);
                     </a>
 
                     <!-- 导航菜单 -->
-                    <div class="flex items-center space-x-6">
-                        <a href="alltuu.html" id="photoLiveLink" class="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-primary to-primary/70 text-white rounded-md text-sm font-medium shadow-[0_4px_12px_rgba(0,102,204,0.3)] hover:bg-gradient-to-r from-primary/90 to-primary/50 hover:shadow-[0_6px_20px_rgba(0,102,204,0.4)] transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                    <div class="flex items-center space-x-3">
+                        <a href="alltuu.html" id="photoLiveLink"
+                            class="inline-flex items-center space-x-0.5 px-1 py-2 bg-gradient-to-r from-primary to-primary/70 text-white rounded-md text-xs font-medium shadow-[0_4px_12px_rgba(0,102,204,0.3)] hover:bg-gradient-to-r from-primary/90 to-primary/50 hover:shadow-[0_6px_20px_rgba(0,102,204,0.4)] transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
                             <i class="fa fa-camera"></i>
                             <span>照片直播</span>
                         </a>
@@ -523,7 +549,7 @@ transform: scale(1.02);
                     <!-- 工作照 - 保持中屏幕大小 -->
                     <div class="w-full md:w-auto max-w-xs">
                         <div class="aspect-[2/3] overflow-hidden rounded-lg shadow-md w-full">
-                            <img src="image/青尘摄影工作照.jpg" alt="工作照" class="w-full h-full object-cover" />
+                            <img src="image/青尘摄影海报.jpg" alt="工作照" class="w-full h-full object-cover" />
                         </div>
                     </div>
 
@@ -688,24 +714,33 @@ transform: scale(1.02);
     </main>
 
     <!-- 页脚 -->
-    <footer class="bg-dark text-white h-16 md:h-20 flex items-center">
+    <footer class="bg-dark text-white py-2 md:py-3 flex items-center justify-center">
         <div class="container mx-auto px-4 md:px-6 lg:px-8 w-full">
-            <!-- 版权信息 -->
-            <div class="text-center text-gray-500 text-sm">
-                <p class="max-w-full break-normal">
-                    <span class="block sm:inline">© 2025-2026 青尘摄影工作室 版权所有</span>
-                    <span class="hidden sm:inline"> | </span>
-                    <span class="block sm:inline">
-                        <a href="privacy.html" class="text-primary hover:text-blue-400 transition-colors underline">隐私策略</a>
+            <div class="text-center text-gray-500 text-xs space-y-1">
+                <!-- 第一行：版权信息和隐私策略 -->
+                <div class="flex items-center justify-center flex-wrap">
+                    <span class="footer-item">© 2025-
+                        <script>document.write(new Date().getFullYear());</script> 青尘摄影工作室 版权所有
                     </span>
-                    <span class="hidden sm:inline"> | </span>
-                    <span class="block sm:inline">
-                        <a href="http://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer"
-                            class="text-primary hover:text-blue-400 transition-colors underline">
-                            粤ICP备2025515306号-1
-                        </a>
-                    </span>
-                </p>
+                    <a href="privacy.html" id="privacyLink" 
+                       class="footer-item text-primary hover:text-blue-400 transition-colors underline">
+                        隐私策略
+                    </a>
+                </div>
+                
+                <!-- 第二行：备案信息 -->
+                <div class="flex items-center justify-center flex-wrap">
+                    <a href="http://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" 
+                       class="footer-item text-primary hover:text-blue-400 transition-colors underline">
+                        粤ICP备2025515306号-1
+                    </a>
+                    <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44060502004173" 
+                       target="_blank" rel="noopener noreferrer" 
+                       class="footer-item text-primary hover:text-blue-400 transition-colors underline flex items-center gap-1">
+                        <img src="image/备案图标.png" alt="公安备案图标" class="w-4 h-4 inline-block align-middle">
+                        <span>粤公网安备44060502004173号</span>
+                    </a>
+                </div>
             </div>
         </div>
     </footer>
@@ -877,59 +912,62 @@ transform: scale(1.02);
                 console.error('图片懒加载出错:', error);
             }
         });
-// 更新照片直播链接，添加URL参数（如果有）
-function updatePhotoLiveLink() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const albumId = urlParams.get('id');
-    const photoLiveLink = document.getElementById('photoLiveLink');
-    
-    if (albumId) {
-        photoLiveLink.href = `alltuu.html?id=${albumId}`;
-    } else {
-        photoLiveLink.href = 'alltuu.html';
-    }
-}
+        // 更新照片直播链接，添加URL参数（如果有）
+        function updateLink() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const albumId = urlParams.get('id');
+            const photoLiveLink = document.getElementById('photoLiveLink');
+            const privacyLink = document.getElementById('privacyLink');
 
-// 页面加载完成后执行
-window.addEventListener('DOMContentLoaded', function() {
-    // 保持原有的图片懒加载代码
-    try {
-        const lazyImages = document.querySelectorAll('img.lazy');
-        if ('IntersectionObserver' in window) {
-            const options = {
-                rootMargin: '200px 0px',
-                threshold: 0.1
-            };
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        // 添加淡入效果
-                        img.style.transition = 'opacity 0.5s ease-in';
-                        img.style.opacity = '1';
-                        observer.unobserve(img);
-                    }
-                });
-            }, options);
-
-            // 为所有懒加载图片添加初始状态
-            lazyImages.forEach(img => {
-                img.style.opacity = '0';
-                observer.observe(img);
-            });
-        } else {
-            // 降级方案：立即显示所有懒加载图片
-            lazyImages.forEach(img => {
-                img.style.opacity = '1';
-            });
+            if (albumId) {
+                photoLiveLink.href = `alltuu.html?id=${albumId}`;
+                privacyLink.href = `privacy.html?id=${albumId}`;
+            } else {
+                photoLiveLink.href = 'alltuu.html';
+                privacyLink.href = 'privacy.html';
+            }
         }
-    } catch (error) {
-        console.error('图片懒加载出错:', error);
-    }
-    
-    // 添加我们的新功能
-    updatePhotoLiveLink();
-});
+
+        // 页面加载完成后执行
+        window.addEventListener('DOMContentLoaded', function () {
+            // 保持原有的图片懒加载代码
+            try {
+                const lazyImages = document.querySelectorAll('img.lazy');
+                if ('IntersectionObserver' in window) {
+                    const options = {
+                        rootMargin: '200px 0px',
+                        threshold: 0.1
+                    };
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const img = entry.target;
+                                // 添加淡入效果
+                                img.style.transition = 'opacity 0.5s ease-in';
+                                img.style.opacity = '1';
+                                observer.unobserve(img);
+                            }
+                        });
+                    }, options);
+
+                    // 为所有懒加载图片添加初始状态
+                    lazyImages.forEach(img => {
+                        img.style.opacity = '0';
+                        observer.observe(img);
+                    });
+                } else {
+                    // 降级方案：立即显示所有懒加载图片
+                    lazyImages.forEach(img => {
+                        img.style.opacity = '1';
+                    });
+                }
+            } catch (error) {
+                console.error('图片懒加载出错:', error);
+            }
+
+            // 添加我们的新功能
+            updateLink();
+        });
     </script>
 </body>
 
