@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青尘摄影工作室 - 限时优惠</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0066CC',
+                        secondary: '#1E293B',
+                        accent: '#FF6D00',
+                        dark: '#111111',
+                        light: '#F5F5F5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- 进度条样式 -->
+    <style>
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: #0066CC;
+            z-index: 9999;
+            transition: width 0.2s ease;
+        }
+
+    </style>
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?cf3a5f4a8a435f0a6a15ed90ddc7a1de";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</head>
+
+<body class="bg-gray-100 text-secondary antialiased flex flex-col min-h-screen">
+
+    <!-- 进度条 -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 bg-transparent z-50">
+        <div class="container mx-auto px-4 md:px-6 lg:px-8">
+            <nav class="flex items-center justify-between h-16 md:h-20">
+                <!-- Logo - 返回首页 -->
+                <span class="text-xl font-bold text-dark"></span>
+
+                <!-- 导航菜单 -->
+                <div class="flex items-center space-x-6">
+                    <a href="javascript:window.history.back()"
+                        class="text-sm font-medium text-gray-700 hover:text-primary transition-colors">返回</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="flex-1 pt-4 md:pt-20">
+        <section
+            class="relative bg-gray-100 pt-0 md:pt-10 lg:pt-10 pb-8 md:pb-10 lg:pb-10">
+            <div class="container mx-auto px-4 md:px-6 lg:px-8 max-w-4xl">
+                <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-1 text-center">限时优惠</h1>
+                <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow-sm">
+                     <img src="image/青尘摄影海报20260128.jpg" alt="照片1"
+                        class="w-full max-w-2xl h-auto rounded-lg shadow-md transition-all duration-300 hover:shadow-lg">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+        // 进度条功能
+        window.addEventListener('scroll', () => {
+            try {
+                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrollPercentage = (scrollHeight > 0) ? (scrollTop / scrollHeight) * 100 : 0;
+
+                const progressBar = document.getElementById('progressBar');
+                if (progressBar) progressBar.style.width = scrollPercentage + '%';
+
+                // 导航栏样式变化
+                const header = document.querySelector('header');
+                if (header) {
+                    if (scrollTop > 50) {
+                        header.classList.add('shadow-sm');
+                    } else {
+                        header.classList.remove('shadow-sm');
+                    }
+                }
+            } catch (scrollError) {
+                console.error('滚动事件处理出错:', scrollError);
+            }
+
+        });
+    </script>
+</body>
+
+</html>

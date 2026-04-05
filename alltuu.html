@@ -118,7 +118,7 @@
     <div class="progress-bar" id="progressBar"></div>
 
     <!-- 导航栏 - 固定在顶部 -->
-    <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm z-50 border-b border-gray-200">
+    <header class="hidden fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm z-50 border-b border-gray-200">
         <div class="container mx-auto px-4 md:px-6 lg:px-8">
             <nav class="flex items-center justify-between h-16 md:h-20">
                 <!-- Logo - 返回首页 -->
@@ -131,8 +131,7 @@
                     <a href="#" id="promotionLink"
                         class="inline-flex items-center space-x-0.5 px-1 py-2 bg-gradient-to-r from-[#FF7D00] to-[#FF7D00]/80 text-white rounded-md text-xs font-medium shadow-[0_4px_12px_rgba(255,125,0,0.3)] hover:bg-gradient-to-r from-[#FF7D00]/90 to-[#FF7D00]/60 hover:shadow-[0_6px_20px_rgba(255,125,0,0.4)] transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#FF7D00] focus:ring-offset-2">
                         <span>🎁</span>
-                        <!-- <span>限时优惠</span> -->
-                        <span>新春优惠</span>
+                        <span>随意逛逛</span>
                     </a>
                     <a href="#" id="moreLink"
                         class="inline-flex items-center space-x-0.5 px-1 py-2 bg-gradient-to-r from-primary to-primary/70 text-white rounded-md text-xs font-medium shadow-[0_4px_12px_rgba(0,102,204,0.3)] hover:bg-gradient-to-r from-primary/90 to-primary/50 hover:shadow-[0_6px_20px_rgba(0,102,204,0.4)] transition-all duration-200 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
@@ -145,7 +144,7 @@
     </header>
 
     <!-- 中间内容区域 -->
-    <div class="flex-grow pt-16 md:pt-20 relative">
+    <div class="flex-grow pt-16 md:pt-20 relative" id="mainContent">
         <!-- 错误提示容器 -->
         <div class="error-overlay absolute inset-0" id="errorOverlay" style="display: none;">
             <div class="error-content text-center">
@@ -166,7 +165,7 @@
     </div>
 
     <!-- 页脚 - 与首页保持一致 -->
-<footer class="bg-dark text-white py-2 md:py-3 flex items-center justify-center">
+<footer class="hidden bg-dark text-white py-2 md:py-3 flex items-center justify-center">
     <div class="container mx-auto w-full">
             <div class="text-center text-gray-500 text-xs space-y-1">
             <!-- 第一行：版权信息和隐私策略 -->
@@ -177,6 +176,10 @@
                 <a href="privacy.html" id="privacyLink" 
                    class="footer-item text-primary hover:text-blue-400 transition-colors underline">
                     隐私策略
+                </a>
+                <a href="index.html" id="contactLink" 
+                   class="footer-item text-primary hover:text-blue-400 transition-colors underline">
+                    联系我们
                 </a>
             </div>
             
@@ -227,33 +230,49 @@
 
         // 设置iframe的src
         function setIframeSrc() {
-            const albumId = checkParameters();
-            const iframe = document.getElementById('contentIframe');
+            try {
+                const albumId = checkParameters();
+                const iframe = document.getElementById('contentIframe');
 
-            if (albumId) {
-                // 设置iframe的src为带有正确参数的链接
-                iframe.src = `https://m.alltuu.com/album/${albumId}/`;
+                if (albumId && iframe) {
+                    // 设置iframe的src为带有正确参数的链接
+                    iframe.src = `https://m.alltuu.com/album/${albumId}/`;
+                }
+            } catch (error) {
+                console.error('setIframeSrc error:', error);
             }
         }
 
         // 获取iframe元素
-        const iframe = document.getElementById('contentIframe');
+        let iframe;
 
-        // 监听iframe内部滚动事件来更新进度条
-        iframe.onload = function () {
+        // 初始化iframe相关功能
+        function initIframe() {
             try {
-                // 获取iframe内部文档
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                iframe = document.getElementById('contentIframe');
+                if (!iframe) return;
+                
+                // 监听iframe内部滚动事件来更新进度条
+                iframe.onload = function () {
+                    try {
+                        // 获取iframe内部文档
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
-                // 监听iframe内部滚动
-                iframeDoc.addEventListener('scroll', function () {
-                    updateProgressBar();
-                });
+                        // 监听iframe内部滚动
+                        iframeDoc.addEventListener('scroll', function (e) {
+                            updateProgressBar();
+                            // 确保iframe内部滚动事件不会冒泡到父页面
+                            e.stopPropagation();
+                        });
+                    } catch (error) {
+                        console.log('跨域访问限制，使用iframe容器滚动');
+                        // 跨域时，使用默认的window滚动事件
+                    }
+                };
             } catch (error) {
-                console.log('跨域访问限制，使用iframe容器滚动');
-                // 跨域时，使用默认的window滚动事件
+                console.error('initIframe error:', error);
             }
-        };
+        }
 
         // 更新进度条的函数
         function updateProgressBar() {
@@ -284,29 +303,104 @@
 
         // 添加新函数来更新导航链接和Logo链接
         function updateLink() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const albumId = urlParams.get('id');
-            const promotionLink = document.getElementById('promotionLink');
-            const moreLink = document.getElementById('moreLink');
-            const homeLink = document.getElementById('homeLink');
-            const privacyLink = document.getElementById('privacyLink');
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const albumId = urlParams.get('id');
+                
+                // 获取所有链接元素，检查是否存在
+                const promotionLink = document.getElementById('promotionLink');
+                const moreLink = document.getElementById('moreLink');
+                const homeLink = document.getElementById('homeLink');
+                const privacyLink = document.getElementById('privacyLink');
+                const contactLink = document.getElementById('contactLink');
 
-            if (albumId) {
-                promotionLink.href = `promotion.html?id=${albumId}`;
-                moreLink.href = `index.html?id=${albumId}`;
-                homeLink.href = `index.html?id=${albumId}`;
-                privacyLink.href = `privacy.html?id=${albumId}`;
-            } else {
-                promotionLink.href = 'promotion.html';
-                moreLink.href = 'index.html';
-                homeLink.href = 'index.html';
-                privacyLink.href = 'privacy.html';
+                const links = [promotionLink, moreLink, homeLink, privacyLink, contactLink];
+                const baseUrls = ['promotion.html', 'index.html', 'index.html', 'privacy.html', 'index.html'];
+                const refs = ['alltuupromo', 'alltuumore', 'alltuuhome', 'alltuuprivacy', 'alltuucontact'];
+
+                links.forEach((link, index) => {
+                    if (link) {
+                        if (albumId) {
+                            link.href = `${baseUrls[index]}?id=${albumId}&ref=${refs[index]}`;
+                        } else {
+                            link.href = baseUrls[index];
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('updateLink error:', error);
             }
         }
+        // 检查是否需要隐藏导航和页脚
+        function checkHideMode() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const hide = urlParams.get('hide');
+                
+                const header = document.querySelector('header');
+                const footer = document.querySelector('footer');
+                const mainContent = document.getElementById('mainContent');
+                
+                // 检查DOM元素是否存在
+                if (!header || !footer || !mainContent) {
+                    console.error('checkHideMode error: DOM elements not found');
+                    return;
+                }
+                
+                // 当参数存在且值为1时，隐藏导航栏和页脚，使iframe满屏
+                if (hide && hide === '1') {
+                    // 隐藏导航栏和页脚
+                    header.style.display = 'none';
+                    footer.style.display = 'none';
+                    
+                    // 移除顶部内边距，让iframe满屏
+                    mainContent.classList.remove('pt-16', 'md:pt-20');
+                    mainContent.classList.add('pt-0');
+                    
+                    // 设置body为100%高度，确保iframe可以占满整个屏幕
+                    document.body.style.height = '100vh';
+                    document.body.style.overflow = 'hidden';
+                }
+                else{
+                    // 如果参数不存在或值不为1，确保导航栏和页脚显示，并恢复顶部内边距
+                    header.classList.remove('hidden');
+                    header.style.display = 'block';
+                    footer.classList.remove('hidden');
+                    footer.style.display = 'flex';
+                    mainContent.classList.add('pt-16', 'md:pt-20');
+                    mainContent.classList.remove('pt-0');
+                    document.body.style.height = '';
+                    document.body.style.overflow = '';
+                }
+            } catch (error) {
+                console.error('checkHideMode error:', error);
+            }
+        }
+
         // 页面加载完成后执行参数检查和iframe设置
-        window.addEventListener('DOMContentLoaded', function () {
-            setIframeSrc();
-            updateLink();
+        function initPage() {
+            try {
+                setIframeSrc();
+                updateLink();
+                checkHideMode();
+                initIframe();
+                // 确保页面可以正常滚动
+                document.body.style.touchAction = 'auto';
+            } catch (error) {
+                console.error('initPage error:', error);
+                // 即使初始化出错，也要确保页面可以滚动
+                document.body.style.touchAction = 'auto';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initPage);
+        
+        // 监听页面显示事件，确保从其他页面返回时也能正确初始化
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // 页面是从缓存中恢复的，重新初始化
+                initPage();
+            }
         });
     </script>
 </body>
